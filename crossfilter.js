@@ -528,6 +528,9 @@ function crossfilter_reduceSubtract(f) {
 }
 exports.crossfilter = crossfilter;
 
+crossfilter.OBJ = "obj";
+crossfilter.ARRAY = "array";
+
 function crossfilter() {
   var crossfilter = {
     add: add,
@@ -591,7 +594,7 @@ function crossfilter() {
   }
 
   // Adds a new dimension with the specified value accessor function.
-  function dimension(value) {
+  function dimension(value, dimensionType) {
     var dimension = {
       filter: filter,
       filterExact: filterExact,
@@ -604,7 +607,8 @@ function crossfilter() {
       group: group,
       groupAll: groupAll,
       dispose: dispose,
-      remove: dispose // for backwards-compatibility
+      remove: dispose, // for backwards-compatibility
+      getType: getType
     };
 
     var one = ~m & -~m, // lowest unset bit as mask, e.g., 00001000
@@ -792,6 +796,10 @@ function crossfilter() {
       filterListeners.forEach(function(l) { l(one, added, removed, reset); });
       return dimension;
     }
+    
+    function getType() {
+      return dimensionType;
+    }
 
     // Filters this dimension using the specified range, value, or null.
     // If the range is null, this is equivalent to filterAll.
@@ -814,9 +822,9 @@ function crossfilter() {
       for (var i = 0, n = filters.length; i < n; ++i) {
         if (i === 1) union = true;
         (Array.isArray(filters[i]) ? filterRange : filterExact)(filters[i]);
-        union = false;
-        resetNeeded = true;
       }
+      union = false;
+      resetNeeded = true;
       return dimension;
     }
 
